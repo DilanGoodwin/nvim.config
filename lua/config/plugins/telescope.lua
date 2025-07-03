@@ -5,19 +5,28 @@ return {
     'nvim-lua/plenary.nvim',
     {
       "nvim-telescope/telescope-fzf-native.nvim",
-      build="make"
+      build = "make"
     },
   },
 
-  config=function()
-    require("telescope").setup {
-      pickers={
-        find_files={theme="ivy"}
+  config = function()
+    require("telescope").setup({
+      pickers = {
+        find_files = { theme = "ivy" }
       },
-      extensions={
-        fzf={}
+      extensions = {
+        fzf = {}
+      },
+      defaults = {
+        mappings = {
+          i = {
+            ["<C-k>"] = require("telescope.actions").move_selection_previous,
+            ["<C-j>"] = require("telescope.actions").move_selection_next,
+            ["<C-q>"] = require("telescope.actions").send_selected_to_qflist,
+          }
+        }
       }
-    }
+    })
 
     require("telescope").load_extension("fzf")
     require("config.telescope.multigrep").setup()
