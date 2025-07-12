@@ -18,6 +18,9 @@ return {
         fzf = {}
       },
       defaults = {
+        layout_config = {
+          bottom_pane = { preview_width = 0.7 }
+        },
         mappings = {
           i = {
             ["<C-k>"] = require("telescope.actions").move_selection_previous,
