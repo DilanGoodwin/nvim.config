@@ -1,5 +1,6 @@
 return {
   "nvim-treesitter/nvim-treesitter",
+  dependencies = { "nvim-treesitter/playground" },
   enabled = true,
   --  branch="main",
   build = ":TSUpdate",
