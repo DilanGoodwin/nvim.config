@@ -40,16 +40,35 @@ local filter_tree = function()
   return found_functions
 end
 
-local testing_function = function()
-  local found_names = filter_tree()
+local telescope_window = function(items)
+  local tel_config = require('telescope.config').values
+  local tel_picker = require('telescope.pickers')
+  local tel_finder = require('telescope.finders')
+  local tel_theme = require('telescope.themes')
 
-  local string_to_print = "Functions: "
-
-  for i = 0, #found_names do
-    string_to_print = string_to_print .. treesitter.get_node_text(found_names[i], 0) .. ','
+  -- Generate table of items to show
+  local tel_items = {}
+  for i = 0, #items do
+    table.insert(tel_items, treesitter.get_node_text(items[i], 0))
   end
 
-  printer(string_to_print)
+  -- Setting Theme
+  local opts = tel_theme.get_ivy({ preview_width = "0.7" })
+
+  -- Telescope Picker
+  tel_picker.new(opts, {
+    prompt_title = "Filter",
+    finder = tel_finder.new_table({
+      results = tel_items,
+    }),
+    previewer = tel_config.file_previewer({}),
+    sorter = tel_config.generic_sorter(),
+  }):find()
+end
+
+local testing_function = function()
+  local found_names = filter_tree()
+  telescope_window(found_names)
 end
 
 M.setup = function()
