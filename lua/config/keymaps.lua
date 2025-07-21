@@ -15,3 +15,10 @@ vim.keymap.set("n", "<leader>sl", function() harpoon:list():next() end) -- Next 
 vim.keymap.set("n", "<leader>sh", function() harpoon:list():prev() end) -- Prev File
 
 vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+
+-- Custom Scripts
+vim.keymap.set("n", "<leader>fl", function()
+  require('config.telescope.function_filter').treesitter_query(
+    require("telescope.themes").get_ivy({ preview_width = "0.7" })
+  )
+end)

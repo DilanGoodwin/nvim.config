@@ -1,78 +1,65 @@
 local treesitter = vim.treesitter
+local tel_config = require('telescope.config').values
+local tel_picker = require('telescope.pickers')
+local tel_finder = require('telescope.finders')
+local tel_entry = require('telescope.make_entry')
+local query_file = require('config.telescope.queries')
 
 local M = {}
 
-local query = [[
-(function_definition
-(pointer_declarator (function_declarator (identifier) @name )*)*
-(function_declarator (identifier) @name )*
-)
-]]
-
-local printer = function(value)
-  print(vim.inspect(value))
+local retrieve_query = function(language)
+  return query_file.get_query(language)
 end
 
-local filter_tree = function()
-  local filetype = vim.api.nvim_get_option_value('filetype', { buf = 0 })
+local filter_tree = function(language, query)
   local tree = treesitter.get_parser():parse()[1]
-
-  -- ERROR Check - language checks to be moved into own function for grabbing query
-  local language = treesitter.language.get_lang(filetype)
-  if language == nil then
-    print("ERROR Detecting Language")
-    return nil
-  end
-
   local results = treesitter.query.parse(language, query)
-  local found_functions = {}
-  local iter = 0
+  local found_items = {}
 
   for _, matches, _ in results:iter_matches(tree:root(), 0) do
     for _, nodes in ipairs(matches) do
       for _, node in ipairs(nodes) do
-        found_functions[iter] = node
-        iter = iter + 1
+        table.insert(found_items, { node = node, kind = language })
       end
     end
   end
 
-  return found_functions
+  return found_items
 end
 
-local telescope_window = function(items)
-  local tel_config = require('telescope.config').values
-  local tel_picker = require('telescope.pickers')
-  local tel_finder = require('telescope.finders')
-  local tel_theme = require('telescope.themes')
-
-  -- Generate table of items to show
-  local tel_items = {}
-  for i = 0, #items do
-    table.insert(tel_items, treesitter.get_node_text(items[i], 0))
-  end
-
-  -- Setting Theme
-  local opts = tel_theme.get_ivy({ preview_width = "0.7" })
+local telescope_window = function(opts, filtered_items)
+  opts = opts or {}
 
   -- Telescope Picker
   tel_picker.new(opts, {
     prompt_title = "Filter",
     finder = tel_finder.new_table({
-      results = tel_items,
+      results = filtered_items,
+      entry_maker = tel_entry.gen_from_treesitter(opts),
     }),
-    previewer = tel_config.file_previewer({}),
+    previewer = tel_config.qflist_previewer(opts),
     sorter = tel_config.generic_sorter(),
   }):find()
 end
 
-local testing_function = function()
-  local found_names = filter_tree()
-  telescope_window(found_names)
+M.setup = function()
 end
 
-M.setup = function()
-  vim.keymap.set("n", "<leader>fl", testing_function)
+M.treesitter_query = function(opts)
+  local current_buf = vim.api.nvim_get_current_buf()
+  local filetype = vim.api.nvim_get_option_value('filetype', { buf = current_buf })
+  local language = treesitter.language.get_lang(filetype)
+
+  -- ERROR Check - language checks to be moved into own function for grabbing query
+  if language == nil then
+    print("ERROR: Detecting Language")
+    return
+  end
+
+  local retrieved_query = retrieve_query(language)
+  local found_items = filter_tree(language, retrieved_query)
+
+  telescope_window(opts, found_items)
 end
 
 return M

@@ -33,6 +33,5 @@ return {
 
     require("telescope").load_extension("fzf")
     require("config.telescope.multigrep").setup()
-    require("config.telescope.function_filter").setup()
   end
 }
