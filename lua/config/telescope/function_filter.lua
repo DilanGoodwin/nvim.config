@@ -7,10 +7,6 @@ local query_file = require('config.telescope.queries')
 
 local M = {}
 
-local retrieve_query = function(language)
-  return query_file.get_query(language)
-end
-
 local filter_tree = function(language, query)
   local tree = treesitter.get_parser():parse()[1]
   local results = treesitter.query.parse(language, query)
@@ -56,7 +52,7 @@ M.treesitter_query = function(opts)
     return
   end
 
-  local retrieved_query = retrieve_query(language)
+  local retrieved_query = query_file.get_query(language)
   local found_items = filter_tree(language, retrieved_query)
 
   telescope_window(opts, found_items)
