@@ -2,6 +2,7 @@ local query_list = {
   ["c"] = [[
     (function_definition(pointer_declarator(function_declarator(identifier) @name )*)*
     (function_declarator(identifier) @name )*)
+    (preproc_function_def(identifier) @name )
     (enum_specifier(type_identifier) @name )
     (type_definition(struct_specifier(type_identifier) @name ))
     ]],
