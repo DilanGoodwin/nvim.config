@@ -3,9 +3,31 @@ local tel_config = require('telescope.config').values
 local tel_picker = require('telescope.pickers')
 local tel_finder = require('telescope.finders')
 local tel_entry = require('telescope.make_entry')
-local query_file = require('config.telescope.queries')
 
 local M = {}
+
+local query_list = {
+  ["c"] = [[
+    (function_definition(pointer_declarator(function_declarator(identifier) @name )*)*
+    (function_declarator(identifier) @name )*)
+    (preproc_function_def(identifier) @name )
+    (enum_specifier(type_identifier) @name )
+    (type_definition(struct_specifier(type_identifier) @name ))
+    ]],
+  ["lua"] = [[
+    (assignment_statement(variable_list
+      name: [ (identifier)(dot_index_expression)] @name
+      )(expression_list (function_definition)))
+    ]],
+}
+
+local get_language = function()
+  local current_buf = vim.api.nvim_get_current_buf()
+  local filetype = vim.api.nvim_get_option_value('filetype', { buf = current_buf })
+  local language = treesitter.language.get_lang(filetype)
+
+  return language
+end
 
 local filter_tree = function(language, query)
   local tree = treesitter.get_parser():parse()[1]
@@ -42,17 +64,18 @@ M.setup = function()
 end
 
 M.treesitter_query = function(opts)
-  local current_buf = vim.api.nvim_get_current_buf()
-  local filetype = vim.api.nvim_get_option_value('filetype', { buf = current_buf })
-  local language = treesitter.language.get_lang(filetype)
-
-  -- ERROR Check - language checks to be moved into own function for grabbing query
+  local language = get_language()
   if language == nil then
     print("ERROR: Detecting Language")
     return
   end
 
-  local retrieved_query = query_file.get_query(language)
+  local retrieved_query = query_list[language]
+  if retrieved_query == nil then
+    print("ERROR: Finding Query - Language: " .. language)
+    return
+  end
+
   local found_items = filter_tree(language, retrieved_query)
 
   telescope_window(opts, found_items)
