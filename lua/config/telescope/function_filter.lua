@@ -10,9 +10,13 @@ local query_list = {
   ["c"] = [[
     (function_definition(pointer_declarator(function_declarator(identifier) @name )*)*
     (function_declarator(identifier) @name )*)
+
     (preproc_function_def(identifier) @name )
+
     (enum_specifier(type_identifier) @name )
+
     (type_definition(struct_specifier(type_identifier) @name (field_declaration_list)))
+    (type_definition declarator : (type_identifier) @name )
     (struct_specifier(type_identifier) @name (field_declaration_list))
     ]],
   ["lua"] = [[
@@ -38,6 +42,7 @@ local filter_tree = function(language, query)
   for _, matches, _ in results:iter_matches(tree:root(), 0) do
     for _, nodes in ipairs(matches) do
       for _, node in ipairs(nodes) do
+        -- TODO - Create check to see if node with same text is already withing the array
         table.insert(found_items, { node = node, kind = language })
       end
     end
