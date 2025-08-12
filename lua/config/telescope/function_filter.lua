@@ -13,11 +13,10 @@ local query_list = {
 
     (preproc_function_def(identifier) @name )
 
-    (enum_specifier(type_identifier) @name )
+    (enum_specifier !name) @name
+    (enum_specifier name : (type_identifier) @name)
 
-    (type_definition(struct_specifier(type_identifier) @name (field_declaration_list)))
     (type_definition declarator : (type_identifier) @name )
-    (struct_specifier(type_identifier) @name (field_declaration_list))
     ]],
   ["lua"] = [[
     (assignment_statement(variable_list
