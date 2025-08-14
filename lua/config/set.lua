@@ -12,7 +12,7 @@ vim.opt.wrap = false
 
 vim.opt.incsearch = true
 
-vim.opt.scrolloff = 8
+vim.opt.scrolloff = 15
 
 -- LSP Config
 vim.diagnostic.config({ virtual_text = true })
