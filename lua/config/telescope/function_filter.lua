@@ -23,6 +23,9 @@ local query_list = {
       name: [ (identifier)(dot_index_expression)] @name
       )(expression_list (function_definition)))
     ]],
+  ["markdown"] = [[
+    (atx_heading) @name
+  ]]
 }
 
 local get_language = function()
