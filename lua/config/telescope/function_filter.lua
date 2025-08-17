@@ -28,6 +28,8 @@ local lang_keypoints_queries = {
   ]]
 }
 
+local cur_buf = vim.api.nvim_get_current_buf()
+
 local table_length = function(table_item)
   local count = 0
   for _, _ in pairs(table_item) do count = count + 1 end
@@ -35,14 +37,23 @@ local table_length = function(table_item)
 end
 
 local get_language = function()
-  local current_buf = vim.api.nvim_get_current_buf()
-  local filetype = vim.api.nvim_get_option_value('filetype', { buf = current_buf })
+  local filetype = vim.api.nvim_get_option_value('filetype', { buf = cur_buf })
   local language = treesitter.language.get_lang(filetype)
 
   return language
 end
 
-local filter_tree = function(language, query)
+local node_text_match = function(node, text_match)
+  local node_text = treesitter.get_node_text(node, cur_buf)
+  local match = string.find(node_text, text_match)
+
+  if match ~= nil then return true end
+  return false
+end
+
+local filter_tree = function(language, query, match_text)
+  match_text = match_text or nil
+
   local tree = treesitter.get_parser():parse()[1]
   local results = treesitter.query.parse(language, query)
   local found_items = {}
@@ -50,29 +61,17 @@ local filter_tree = function(language, query)
   for _, matches, _ in results:iter_matches(tree:root(), 0) do
     for _, nodes in ipairs(matches) do
       for _, node in ipairs(nodes) do
-        -- TODO - Create check to see if node with same text is already withing the array
-        table.insert(found_items, { node = node, kind = language })
+        if match_text ~= nil then
+          if node_text_match(node, match_text) then table.insert(found_items, { node = node, kind = language }) end
+        else
+          -- TODO - Create check to see if node with same text is already withing the array
+          table.insert(found_items, { node = node, kind = language })
+        end
       end
     end
   end
 
   return found_items
-end
-
-local match_filtered_items = function(list, content)
-  local bufnr = vim.api.nvim_get_current_buf()
-  local matched_items = {}
-
-  for _, item in ipairs(list) do
-    local node_text = vim.treesitter.get_node_text(item.node, bufnr)
-    local found_content = string.find(node_text, content)
-
-    if found_content ~= nil then
-      table.insert(matched_items, item)
-    end
-  end
-
-  return matched_items
 end
 
 local telescope_window = function(opts, filtered_items)
@@ -125,13 +124,12 @@ M.filter_node_text = function(opts, filter_text)
   end
 
   local query = [[ (_ (comment) @name ) ]]
-  local found_comments = filter_tree(language, query)
-  local found_todo = match_filtered_items(found_comments, "TODO")
-  if table_length(found_todo) == 0 then
+  local found_comments = filter_tree(language, query, filter_text)
+  if table_length(found_comments) == 0 then
     print("ERROR: No Items Found - Language: " .. language)
     return
   end
 
-  telescope_window(opts, found_todo)
+  telescope_window(opts, found_comments)
 end
 return M
