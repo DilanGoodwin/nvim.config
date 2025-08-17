@@ -6,7 +6,7 @@ local tel_entry = require('telescope.make_entry')
 
 local M = {}
 
-local query_list = {
+local lang_keypoints_queries = {
   ["c"] = [[
     (function_definition(pointer_declarator(function_declarator(identifier) @name )*)*
     (function_declarator(identifier) @name )*)
@@ -27,6 +27,12 @@ local query_list = {
     (atx_heading) @name
   ]]
 }
+
+local table_length = function(table_item)
+  local count = 0
+  for _, _ in pairs(table_item) do count = count + 1 end
+  return count
+end
 
 local get_language = function()
   local current_buf = vim.api.nvim_get_current_buf()
@@ -53,6 +59,22 @@ local filter_tree = function(language, query)
   return found_items
 end
 
+local match_filtered_items = function(list, content)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local matched_items = {}
+
+  for _, item in ipairs(list) do
+    local node_text = vim.treesitter.get_node_text(item.node, bufnr)
+    local found_content = string.find(node_text, content)
+
+    if found_content ~= nil then
+      table.insert(matched_items, item)
+    end
+  end
+
+  return matched_items
+end
+
 local telescope_window = function(opts, filtered_items)
   opts = opts or {}
 
@@ -71,22 +93,45 @@ end
 M.setup = function()
 end
 
-M.treesitter_query = function(opts)
+M.lang_keypoints_gen = function(opts)
   local language = get_language()
   if language == nil then
     print("ERROR: Detecting Language")
     return
   end
 
-  local retrieved_query = query_list[language]
+  local retrieved_query = lang_keypoints_queries[language]
   if retrieved_query == nil then
     print("ERROR: Finding Query - Language: " .. language)
     return
   end
 
   local found_items = filter_tree(language, retrieved_query)
+  if table_length(found_items) == 0 then
+    print("ERROR: No Items Found - Language: " .. language)
+    return
+  end
 
   telescope_window(opts, found_items)
 end
 
+M.filter_node_text = function(opts, filter_text)
+  filter_text = filter_text or "TODO"
+
+  local language = get_language()
+  if language == nil then
+    print("ERROR: Detecting Language")
+    return
+  end
+
+  local query = [[ (_ (comment) @name ) ]]
+  local found_comments = filter_tree(language, query)
+  local found_todo = match_filtered_items(found_comments, "TODO")
+  if table_length(found_todo) == 0 then
+    print("ERROR: No Items Found - Language: " .. language)
+    return
+  end
+
+  telescope_window(opts, found_todo)
+end
 return M
