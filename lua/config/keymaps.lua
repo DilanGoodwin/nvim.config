@@ -19,8 +19,11 @@ vim.keymap.set("n", "<leader>sh", function() harpoon:list():prev() end) -- Prev 
 vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
 
 -- Custom Scripts
-local custom_filters = require("config.telescope.function_filter")
+local grep_dir = require("config.telescope.multigrep")
+local file_filters = require("config.telescope.function_filter")
 local treesitter_theme = require("telescope.themes").get_ivy({ preview_width = "0.7" })
 
-vim.keymap.set("n", "<leader>fl", function() custom_filters.lang_keypoints_gen(treesitter_theme) end)
-vim.keymap.set("n", "<leader>fc", function() custom_filters.filter_node_text(treesitter_theme) end)
+vim.keymap.set("n", "<leader>fg", function() grep_dir.LiveMultiGrep(treesitter_theme) end)
+
+vim.keymap.set("n", "<leader>fl", function() file_filters.lang_keypoints_gen(treesitter_theme) end)
+vim.keymap.set("n", "<leader>fc", function() file_filters.filter_node_text(treesitter_theme) end)

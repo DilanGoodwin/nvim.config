@@ -5,7 +5,7 @@ local conf = require("telescope.config").values
 
 local M = {}
 
-local liveMultiGrep = function(opts)
+M.LiveMultiGrep = function(opts)
   opts = opts or {}
   opts.cwd = opts.cwd or vim.uv.cwd()
 
@@ -50,7 +50,6 @@ local liveMultiGrep = function(opts)
 end
 
 M.setup = function()
-  vim.keymap.set("n", "<leader>fg", liveMultiGrep)
 end
 
 return M
