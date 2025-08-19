@@ -18,7 +18,7 @@ return {
 
       require("mason").setup({})
       require("mason-lspconfig").setup({
-        ensure_installed = { "lua_ls", "rust_analyzer", "jdtls", "html", "kotlin_lsp", "perlnavigator", "bashls", "pylsp", "hls", "clangd", },
+        ensure_installed = { "lua_ls", "rust_analyzer", "jdtls", "html", "perlnavigator", "bashls", "pylsp", "clangd", },
         handlers = {
           function(server_name)
             require("lspconfig")[server_name].setup({ capabilities = capabilities })
