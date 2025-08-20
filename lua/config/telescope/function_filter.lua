@@ -17,6 +17,7 @@ local lang_keypoints_queries = {
     (enum_specifier name : (type_identifier) @name)
 
     (type_definition declarator : (type_identifier) @name )
+    (struct_specifier name:(type_identifier) @name body:(field_declaration_list))
     ]],
   ["lua"] = [[
     (assignment_statement(variable_list
