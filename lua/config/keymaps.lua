@@ -6,7 +6,9 @@ vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
 -- Telescope
 local telescope = require("telescope.builtin")
 
-vim.keymap.set("n", "<leader>ff", telescope.find_files)
+vim.keymap.set("n", "<leader>ff",
+  "<cmd>lua require'telescope.builtin'.find_files({ find_command = {'rg', '--files', '--hidden', '-g', '!.git' }})<cr>",
+  { noremap = true })
 vim.keymap.set("n", "<leader>fh", telescope.help_tags)
 
 -- Harpoon
