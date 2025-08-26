@@ -5,9 +5,11 @@ return {
   build = ":TSUpdate",
 
   config = function()
-    require "nvim-treesitter".setup {
+    require "nvim-treesitter.configs".setup {
       ensure_installed = { "lua", "c", "rust", "java", "perl", "haskell" },
-      auto_install = false,
+      sync_install = false,
+      auto_install = true,
+      ignore_install = {},
       highlight = {
         enable = true,
         disable = {},

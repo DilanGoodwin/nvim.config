@@ -19,6 +19,13 @@ local lang_keypoints_queries = {
     (type_definition declarator : (type_identifier) @name )
     (struct_specifier name:(type_identifier) @name body:(field_declaration_list))
     ]],
+  ["java"] = [[
+    (class_declaration name:(identifier) @name)
+
+    (method_declaration name:(identifier) @name)
+
+    (enum_declaration name:(identifier) @name)
+    ]],
   ["lua"] = [[
     (assignment_statement(variable_list
       name: [ (identifier)(dot_index_expression)] @name
