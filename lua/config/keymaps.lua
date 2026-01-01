@@ -33,6 +33,9 @@ vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:lis
 -- Undotree
 vim.keymap.set('n', '<leader>ut', vim.cmd.UndotreeToggle, { desc = '[U]ndotree [T]oggle' })
 
+-- Git Blame
+vim.keymap.set('n', '<leader>gt', vim.cmd.GitBlameToggle, {desc = '[G]itBlame [T]oggle'})
+
 -- Custom Scripts
 -- local grep_dir = require("config.telescope.multigrep")
 -- local file_filters = require("config.telescope.function_filter")
