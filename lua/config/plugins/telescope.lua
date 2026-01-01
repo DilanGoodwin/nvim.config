@@ -1,26 +1,36 @@
 return {
   'nvim-telescope/telescope.nvim',
-  tag = '0.1.8',
+  tag = '*',
   dependencies = {
     'nvim-lua/plenary.nvim',
     {
       "nvim-telescope/telescope-fzf-native.nvim",
-      build = "make"
+      build = "make",
+      cond = function()
+        return vim.fn.executable 'make' == 1
+      end,
     },
+    { 'nvim-telescope/telescope-ui-select.nvim' },
+    { 'nvim-tree/nvim-web-devicons',            enabled = true },
   },
 
   config = function()
     require("telescope").setup({
       pickers = {
-        find_files = { theme = "ivy" }
+        find_files = {
+          hidden = true,
+          no_ignore = true,
+          no_ignore_parent = true,
+          layout_config = { preview_width = 0.65 },
+        },
+        diagnostics = { theme = 'ivy' },
       },
       extensions = {
+        ['ui-select'] = { require('telescope.themes').get_dropdown(), },
         fzf = {}
       },
       defaults = {
-        layout_config = {
-          bottom_pane = { preview_width = 0.7 }
-        },
+        bottom_pane = { height = 10 },
         mappings = {
           i = {
             ["<C-k>"] = require("telescope.actions").move_selection_previous,
@@ -31,7 +41,8 @@ return {
       }
     })
 
-    require("telescope").load_extension("fzf")
-    require("config.telescope.multigrep").setup()
-  end
+    pcall(require('telescope').load_extension, 'fzf')
+    pcall(require('telescope').load_extension, 'ui-select')
+    require('config.telescope.multigrep').setup()
+  end,
 }

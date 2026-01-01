@@ -1,20 +1,16 @@
 return {
   "nvim-treesitter/nvim-treesitter",
-  enabled = true,
-  --  branch="main",
   build = ":TSUpdate",
+  lazy = false,
 
   config = function()
-    require "nvim-treesitter.configs".setup {
-      ensure_installed = { "lua", "c", "rust", "java", "perl", "haskell" },
-      sync_install = false,
+    require('nvim-treesitter.config').setup({
+      ensure_installed = {},
       auto_install = true,
-      ignore_install = {},
       highlight = {
         enable = true,
-        disable = {},
         additional_vim_regex_highlighting = false,
-      },
-    }
+      }
+    })
   end,
 }
