@@ -4,8 +4,6 @@ local tel_picker = require('telescope.pickers')
 local tel_finder = require('telescope.finders')
 local tel_entry = require('telescope.make_entry')
 
-local M = {}
-
 local lang_keypoints_queries = {
   ["c"] = [[
     (function_definition(pointer_declarator(function_declarator(identifier) @name )*)*
@@ -26,6 +24,9 @@ local lang_keypoints_queries = {
 
     (enum_declaration name:(identifier) @name)
     ]],
+  ["python"] = [[
+    (function_definition name:(identifier) @name)
+    ]],
   ["lua"] = [[
     (assignment_statement(variable_list
       name: [ (identifier)(dot_index_expression)] @name
@@ -33,8 +34,16 @@ local lang_keypoints_queries = {
     ]],
   ["markdown"] = [[
     (atx_heading) @name
-  ]]
+  ]],
+  ["bash"] = [[
+    (function_definition name:(word) @name)
+  ]],
+  ["perl"] = [[
+    (subroutine_declaration_statement name:(bareword) @name)
+  ]],
 }
+
+local M = {}
 
 local cur_buf = vim.api.nvim_get_current_buf()
 
@@ -51,17 +60,7 @@ local get_language = function()
   return language
 end
 
-local node_text_match = function(node, text_match)
-  local node_text = treesitter.get_node_text(node, cur_buf)
-  local match = string.find(node_text, text_match)
-
-  if match ~= nil then return true end
-  return false
-end
-
-local filter_tree = function(language, query, match_text)
-  match_text = match_text or nil
-
+local filter_tree = function(language, query)
   local tree = treesitter.get_parser():parse()[1]
   local results = treesitter.query.parse(language, query)
   local found_items = {}
@@ -69,35 +68,12 @@ local filter_tree = function(language, query, match_text)
   for _, matches, _ in results:iter_matches(tree:root(), 0) do
     for _, nodes in ipairs(matches) do
       for _, node in ipairs(nodes) do
-        if match_text ~= nil then
-          if node_text_match(node, match_text) then table.insert(found_items, { node = node, kind = language }) end
-        else
-          -- TODO - Create check to see if node with same text is already withing the array
-          table.insert(found_items, { node = node, kind = language })
-        end
+        table.insert(found_items, { node = node, kind = language })
       end
     end
   end
 
   return found_items
-end
-
-local telescope_window = function(opts, filtered_items)
-  opts = opts or {}
-
-  -- Telescope Picker
-  tel_picker.new(opts, {
-    prompt_title = "Filter",
-    finder = tel_finder.new_table({
-      results = filtered_items,
-      entry_maker = tel_entry.gen_from_treesitter(opts),
-    }),
-    previewer = tel_config.qflist_previewer(opts),
-    sorter = tel_config.generic_sorter(),
-  }):find()
-end
-
-M.setup = function()
 end
 
 M.lang_keypoints_gen = function(opts)
@@ -119,25 +95,16 @@ M.lang_keypoints_gen = function(opts)
     return
   end
 
-  telescope_window(opts, found_items)
+  -- telescope_window(opts, found_items)
+  tel_picker.new(opts, {
+    prompt_title = 'Filter',
+    finder = tel_finder.new_table({
+      results = found_items,
+      entry_maker = tel_entry.gen_from_treesitter(opts),
+    }),
+    previewer = tel_config.qflist_previewer(opts),
+    sorter = tel_config.generic_sorter(),
+  }):find()
 end
 
-M.filter_node_text = function(opts, filter_text)
-  filter_text = filter_text or "TODO"
-
-  local language = get_language()
-  if language == nil then
-    print("ERROR: Detecting Language")
-    return
-  end
-
-  local query = [[ (_ (comment) @name ) ]]
-  local found_comments = filter_tree(language, query, filter_text)
-  if table_length(found_comments) == 0 then
-    print("ERROR: No Items Found - Language: " .. language)
-    return
-  end
-
-  telescope_window(opts, found_comments)
-end
 return M

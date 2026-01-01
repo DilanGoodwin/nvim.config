@@ -22,7 +22,7 @@ vim.keymap.set('n', '<leader>/', function() builtin.current_buffer_fuzzy_find(te
   { desc = '[/] Fuzzy search current buffer' })
 
 vim.keymap.set('n', '<leader>fg', require('config.telescope.multigrep').LiveMultiGrep, { desc = '[F]ilter multi[G]rep' })
-vim.keymap.set('n', '<leader>fl', require('config.telescope.function_filter').lang_keypoints_gen, { desc = '[F]unction [L]ist' })
+vim.keymap.set('n', '<leader>fl', function() require('config.telescope.function_filter').lang_keypoints_gen(telescope_dropdown) end, { desc = '[F]unction [L]ist' })
 
 -- Harpoon
 local harpoon = require("harpoon")
