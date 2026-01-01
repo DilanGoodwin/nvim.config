@@ -21,6 +21,9 @@ local telescope_dropdown = require('telescope.themes').get_dropdown({
 vim.keymap.set('n', '<leader>/', function() builtin.current_buffer_fuzzy_find(telescope_dropdown) end,
   { desc = '[/] Fuzzy search current buffer' })
 
+vim.keymap.set('n', '<leader>fg', require('config.telescope.multigrep').LiveMultiGrep, { desc = '[F]ilter multi[G]rep' })
+vim.keymap.set('n', '<leader>fl', require('config.telescope.function_filter').lang_keypoints_gen, { desc = '[F]unction [L]ist' })
+
 -- Harpoon
 local harpoon = require("harpoon")
 
@@ -35,13 +38,3 @@ vim.keymap.set('n', '<leader>ut', vim.cmd.UndotreeToggle, { desc = '[U]ndotree [
 
 -- Git Blame
 vim.keymap.set('n', '<leader>gt', vim.cmd.GitBlameToggle, {desc = '[G]itBlame [T]oggle'})
-
--- Custom Scripts
--- local grep_dir = require("config.telescope.multigrep")
--- local file_filters = require("config.telescope.function_filter")
--- local treesitter_theme = require("telescope.themes").get_ivy({ preview_width = "0.7" })
---
--- vim.keymap.set("n", "<leader>fg", function() grep_dir.LiveMultiGrep(treesitter_theme) end)
---
--- vim.keymap.set("n", "<leader>fl", function() file_filters.lang_keypoints_gen(treesitter_theme) end)
--- vim.keymap.set("n", "<leader>fc", function() file_filters.filter_node_text(treesitter_theme) end)
