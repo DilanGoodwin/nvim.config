@@ -82,6 +82,10 @@ return {
         underline = { severity = vim.diagnostic.severity.ERROR },
         signs = {
           text = {
+            [vim.diagnostic.severity.ERROR] = "󰅚 ",
+            [vim.diagnostic.severity.WARN] = "󰀪 ",
+            [vim.diagnostic.severity.INFO] = "󰋽 ",
+            [vim.diagnostic.severity.HINT] = "󰌶 ",
           },
         },
         virtual_text = {
@@ -105,11 +109,11 @@ return {
         bashls = {},
         pylsp = {},
         jdtls = {},
-        lua_ls = { settings = { Lua = { completion = { callSnippet = 'Replace', }, }, }, },
+        lua_ls = { settings = { Lua = { completion = { callSnippet = 'Replace' }}}},
         stylua = {},
       }
 
-      require('mason-tool-installer').setup({ vim.tbl_keys(servers or {}) })
+      require('mason-tool-installer').setup({ ensure_installed = vim.tbl_keys(servers or {}) })
       require('mason-lspconfig').setup({
         ensure_installed = {},
         automatic_installation = true,
